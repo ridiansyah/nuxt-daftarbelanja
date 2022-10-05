@@ -1,7 +1,7 @@
 <template>
   <v-data-table
-    :headers="judul_tabel"
-    :items="isi_tabel"
+    :headers="judulTabel"
+    :items="isiTabel"
     sort-by="nama"
     class="elevation-1"
     :search="cari"
@@ -86,17 +86,17 @@ export default {
     cari: "",
     dialog: false,
     dialogDelete: false,
-    judul_tabel: [
-      { text: "Nama Barang", value: "nama" },
-      {
-        text: "Jumlah Barang",
-        align: "start",
-        sortable: false,
-        value: "jumlah",
-      },
-      { text: "Aksi", value: "aksi", sortable: false },
-    ],
-    isi_tabel: [],
+    // judul_tabel: [
+    //   { text: "Nama Barang", value: "nama" },
+    //   {
+    //     text: "Jumlah Barang",
+    //     align: "start",
+    //     sortable: false,
+    //     value: "jumlah",
+    //   },
+    //   { text: "Aksi", value: "aksi", sortable: false },
+    // ],
+    // isi_tabel: [],
     editedIndex: -1,
     editedItem: {
       nama: "",
@@ -111,6 +111,12 @@ export default {
   computed: {
     judulModal() {
       return this.editedIndex === -1 ? "Tambah Barang" : "Edit Barang";
+    },
+    isiTabel() {
+      return [...this.$store.get("isi_tabel")];
+    },
+    judulTabel() {
+      return [...this.$store.get("judul_tabel")];
     },
   },
 
@@ -129,28 +135,30 @@ export default {
 
   methods: {
     initialize() {
-      this.isi_tabel = [
-        {
-          nama: "Sari Roti",
-          jumlah: 2,
-        },
-      ];
+      // this.$store.set("isi_tabel", [
+      //   {
+      //     nama: "Sari Roti",
+      //     jumlah: 2,
+      //   },
+      // ]);
     },
 
     editItem(item) {
-      this.editedIndex = this.isi_tabel.indexOf(item);
+      this.editedIndex = this.isiTabel.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.isi_tabel.indexOf(item);
+      this.editedIndex = this.isiTabel.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.isi_tabel.splice(this.editedIndex, 1);
+      let temp = this.isiTabel;
+      temp.splice(this.editedIndex, 1);
+      this.$store.set("setIsiTabel", temp);
       this.closeDelete();
     },
 
@@ -172,9 +180,14 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.isi_tabel[this.editedIndex], this.editedItem);
+        let temp = this.isiTabel.map((obj) => ({
+          ...obj,
+        }));
+        Object.assign(temp[this.editedIndex], this.editedItem);
+        this.$store.set("setIsiTabel", temp);
       } else {
-        this.isi_tabel.push(this.editedItem);
+        this.isiTabel.push(this.editedItem);
+        this.$store.set("setIsiTabel", this.isiTabel);
       }
       this.close();
     },
