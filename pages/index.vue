@@ -1,42 +1,48 @@
 <template>
-  <v-data-table
-    :headers="judulTabel"
-    :items="isiTabel"
-    sort-by="nama"
-    class="elevation-1"
-    :search="cari"
-  >
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title class="font-weight-bold">{{ judul }}</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-text-field
-          v-model="cari"
-          append-icon="mdi-magnify"
-          label="Cari Barang"
-          single-line
-          hide-details
-        ></v-text-field>
-        <v-spacer></v-spacer>
+  <div>
+    <notifications position="top right" />
 
-        <Barang
-          :judul-modal="judulModal"
-          :edited-item="editedItem"
-          :nama-errors="namaErrors"
-          :jumlah-errors="jumlahErrors"
-          :validator="$v"
-          :close="close"
-          :save="save"
-        />
-      </v-toolbar>
-    </template>
+    <v-data-table
+      :headers="judulTabel"
+      :items="isiTabel"
+      sort-by="nama"
+      class="elevation-1"
+      :search="cari"
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title class="font-weight-bold">{{
+            judul
+          }}</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-text-field
+            v-model="cari"
+            append-icon="mdi-magnify"
+            label="Cari Barang"
+            single-line
+            hide-details
+          ></v-text-field>
+          <v-spacer></v-spacer>
 
-    <template #[`item.aksi`]="{ item }">
-      <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
-      <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
-    </template>
-    <template v-slot:no-data> </template>
-  </v-data-table>
+          <Barang
+            :judul-modal="judulModal"
+            :edited-item="editedItem"
+            :nama-errors="namaErrors"
+            :jumlah-errors="jumlahErrors"
+            :validator="$v"
+            :close="close"
+            :save="save"
+          />
+        </v-toolbar>
+      </template>
+
+      <template #[`item.aksi`]="{ item }">
+        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
+        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+      </template>
+      <template v-slot:no-data> </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
@@ -151,9 +157,21 @@ export default {
           }));
           Object.assign(temp[this.editedIndex], this.editedItem);
           this.$store.set("setIsiTabel", temp);
+
+          this.$notify({
+            title: "Berhasil",
+            type: "success",
+            text: "Berhasil Mengubah Barang",
+          });
         } else {
           this.isiTabel.push(this.editedItem);
           this.$store.set("setIsiTabel", this.isiTabel);
+
+          this.$notify({
+            title: "Berhasil",
+            type: "success",
+            text: "Berhasil Menambah Barang",
+          });
         }
         this.close();
       }
