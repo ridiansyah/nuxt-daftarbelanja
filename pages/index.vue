@@ -19,45 +19,15 @@
         ></v-text-field>
         <v-spacer></v-spacer>
 
-        <v-dialog v-model="dialog" max-width="500px">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Tambah Barang
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">{{ judulModal }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-text-field
-                  v-model="editedItem.nama"
-                  label="Nama Barang"
-                  required
-                  :error-messages="namaErrors"
-                  @input="$v.editedItem.nama.$touch()"
-                  @blur="$v.editedItem.nama.$touch()"
-                ></v-text-field>
-                <v-text-field
-                  v-model.number="editedItem.jumlah"
-                  label="Jumlah Barang"
-                  required
-                  :error-messages="jumlahErrors"
-                  @input="$v.editedItem.jumlah.$touch()"
-                  @blur="$v.editedItem.jumlah.$touch()"
-                ></v-text-field>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close"> Batal </v-btn>
-              <v-btn color="blue darken-1" text @click="save"> Simpan </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <Barang
+          :judul-modal="judulModal"
+          :edited-item="editedItem"
+          :nama-errors="namaErrors"
+          :jumlah-errors="jumlahErrors"
+          :validator="$v"
+          :close="close"
+          :save="save"
+        />
       </v-toolbar>
     </template>
 
@@ -71,11 +41,15 @@
 
 <script>
 import { required, integer } from "vuelidate/lib/validators";
+
+// Components
+import Barang from "@/components/Dialog/Barang";
+
 export default {
+  components: { Barang },
   data: () => ({
     judul: "DAFTAR BELANJA",
     cari: "",
-    dialog: false,
     dialogDelete: false,
     editedIndex: -1,
     editedItem: {
@@ -108,7 +82,6 @@ export default {
 
     namaErrors() {
       const errors = [];
-      console.log("log: ", this.$v);
       if (!this.$v.editedItem.nama.$dirty) return errors;
       !this.$v.editedItem.nama.required &&
         errors.push("Nama tidak boleh kosong!");
@@ -124,16 +97,11 @@ export default {
     },
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-  },
   methods: {
     editItem(item) {
       this.editedIndex = this.isiTabel.indexOf(item);
       this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+      this.$store.set("setModalBarang", true);
     },
 
     deleteItem(item) {
@@ -159,7 +127,7 @@ export default {
 
     close() {
       this.$v.$reset();
-      this.dialog = false;
+      this.$store.set("setModalBarang", false);
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
