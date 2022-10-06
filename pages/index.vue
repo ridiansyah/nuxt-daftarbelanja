@@ -35,10 +35,18 @@
                 <v-text-field
                   v-model="editedItem.nama"
                   label="Nama Barang"
+                  required
+                  :error-messages="namaErrors"
+                  @input="$v.editedItem.nama.$touch()"
+                  @blur="$v.editedItem.nama.$touch()"
                 ></v-text-field>
                 <v-text-field
-                  v-model="editedItem.jumlah"
+                  v-model.number="editedItem.jumlah"
                   label="Jumlah Barang"
+                  required
+                  :error-messages="jumlahErrors"
+                  @input="$v.editedItem.jumlah.$touch()"
+                  @blur="$v.editedItem.jumlah.$touch()"
                 ></v-text-field>
               </v-container>
             </v-card-text>
@@ -71,7 +79,7 @@
       </v-toolbar>
     </template>
 
-    <template v-slot:item.aksi="{ item }">
+    <template #[`item.aksi`]="{ item }">
       <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
       <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
     </template>
@@ -80,33 +88,30 @@
 </template>
 
 <script>
+import { required, integer } from "vuelidate/lib/validators";
 export default {
   data: () => ({
     judul: "DAFTAR BELANJA",
     cari: "",
     dialog: false,
     dialogDelete: false,
-    // judul_tabel: [
-    //   { text: "Nama Barang", value: "nama" },
-    //   {
-    //     text: "Jumlah Barang",
-    //     align: "start",
-    //     sortable: false,
-    //     value: "jumlah",
-    //   },
-    //   { text: "Aksi", value: "aksi", sortable: false },
-    // ],
-    // isi_tabel: [],
     editedIndex: -1,
     editedItem: {
       nama: "",
-      jumlah: 0,
+      jumlah: "",
     },
     defaultItem: {
       nama: "",
-      jumlah: 0,
+      jumlah: "",
     },
   }),
+
+  validations: {
+    editedItem: {
+      nama: { required },
+      jumlah: { required, integer },
+    },
+  },
 
   computed: {
     judulModal() {
@@ -117,6 +122,23 @@ export default {
     },
     judulTabel() {
       return [...this.$store.get("judul_tabel")];
+    },
+
+    namaErrors() {
+      const errors = [];
+      console.log("log: ", this.$v);
+      if (!this.$v.editedItem.nama.$dirty) return errors;
+      !this.$v.editedItem.nama.required &&
+        errors.push("Nama tidak boleh kosong!");
+      return errors;
+    },
+    jumlahErrors() {
+      const errors = [];
+      if (!this.$v.editedItem.jumlah.$dirty) return errors;
+      !this.$v.editedItem.jumlah.required &&
+        errors.push("Jumlah tidak boleh kosong!");
+      !this.$v.editedItem.jumlah.integer && errors.push("Jumlah harus angka!");
+      return errors;
     },
   },
 
@@ -129,19 +151,19 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
+  // created() {
+  //   this.initialize();
+  // },
 
   methods: {
-    initialize() {
-      // this.$store.set("isi_tabel", [
-      //   {
-      //     nama: "Sari Roti",
-      //     jumlah: 2,
-      //   },
-      // ]);
-    },
+    // initialize() {
+    // this.$store.set("isi_tabel", [
+    //   {
+    //     nama: "Sari Roti",
+    //     jumlah: 2,
+    //   },
+    // ]);
+    // },
 
     editItem(item) {
       this.editedIndex = this.isiTabel.indexOf(item);
@@ -163,6 +185,7 @@ export default {
     },
 
     close() {
+      this.$v.$reset();
       this.dialog = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
@@ -179,17 +202,20 @@ export default {
     },
 
     save() {
-      if (this.editedIndex > -1) {
-        let temp = this.isiTabel.map((obj) => ({
-          ...obj,
-        }));
-        Object.assign(temp[this.editedIndex], this.editedItem);
-        this.$store.set("setIsiTabel", temp);
-      } else {
-        this.isiTabel.push(this.editedItem);
-        this.$store.set("setIsiTabel", this.isiTabel);
+      this.$v.$touch();
+      if (!this.$v.$invalid) {
+        if (this.editedIndex > -1) {
+          let temp = this.isiTabel.map((obj) => ({
+            ...obj,
+          }));
+          Object.assign(temp[this.editedIndex], this.editedItem);
+          this.$store.set("setIsiTabel", temp);
+        } else {
+          this.isiTabel.push(this.editedItem);
+          this.$store.set("setIsiTabel", this.isiTabel);
+        }
+        this.close();
       }
-      this.close();
     },
   },
 };
