@@ -23,7 +23,15 @@
             hide-details
           ></v-text-field>
           <v-spacer></v-spacer>
-
+          <v-btn
+            color="error"
+            dark
+            class="mb-2"
+            @click="$router.push('/ebook')"
+          >
+            EBook
+          </v-btn>
+          &nbsp;
           <Barang
             :judul-modal="judulModal"
             :edited-item="editedItem"
@@ -52,6 +60,7 @@ import { required, integer } from "vuelidate/lib/validators";
 import Barang from "@/components/Dialog/Barang";
 
 export default {
+  name: "IndexPage",
   components: { Barang },
   data: () => ({
     judul: "DAFTAR BELANJA",
