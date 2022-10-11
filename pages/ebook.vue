@@ -7,6 +7,19 @@
       <v-spacer></v-spacer>
       <v-btn-toggle v-model="icon" borderless>
         <v-btn
+          :disabled="zoomLevel === 0 ? true : false"
+          @click="zoomLevel -= 10"
+        >
+          <v-icon> mdi-magnify-minus</v-icon>
+        </v-btn>
+
+        <v-btn @click="zoomLevel += 10">
+          <v-icon> mdi-magnify-plus </v-icon>
+        </v-btn>
+      </v-btn-toggle>
+      &nbsp;
+      <v-btn-toggle v-model="icon" borderless>
+        <v-btn
           :disabled="currentPage === 1 ? true : false"
           @click="currentPage -= 1"
         >
@@ -31,7 +44,7 @@
       src="/pdf/Nuxtjs-Cheat-Sheet.pdf"
       @num-pages="pageCount = $event"
       :page="currentPage"
-      :style="`width: ${zoomLevel}`"
+      :style="`width: ${zoomLevel + '%'}`"
     >
     </pdf>
   </div>
@@ -48,7 +61,7 @@ export default {
   data: () => ({
     currentPage: 1,
     totalPage: 3,
-    zoomLevel: "100%",
+    zoomLevel: 100,
   }),
 };
 </script>
